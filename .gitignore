@@ -1,24 +1,69 @@
+# ==========================
+# Dependencies
+# ==========================
+node_modules/
+
+# ==========================
+# Build
+# ==========================
+dist/
+build/
+
+# ==========================
 # Logs
-logs
+# ==========================
+logs/
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
-lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
-*.local
+# ==========================
+# Environment
+# ==========================
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 
-# Editor directories and files
+# Si quieres compartir un ejemplo
+!.env.example
+
+# ==========================
+# IDE
+# ==========================
 .vscode/*
 !.vscode/extensions.json
-.idea
+!.vscode/settings.json
+
+.idea/
+
+# ==========================
+# OS
+# ==========================
 .DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
+Thumbs.db
+
+# ==========================
+# Cache
+# ==========================
+.cache/
+.parcel-cache/
+.eslintcache
+
+# ==========================
+# Vite
+# ==========================
+vite.config.ts.timestamp-*
+
+# ==========================
+# Coverage
+# ==========================
+coverage/
+
+# ==========================
+# TypeScript
+# ==========================
+*.tsbuildinfo
