@@ -1,130 +1,50 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { login } from "../../api/authApi";
+import { Link } from "react-router-dom";
 
-export default function Login() {
-    const navigate = useNavigate();
+import logo from "../../../assets/logos/logo-dark.svg";
+import { LoginForm } from "../components/LoginForm";
 
-    const [username, setUsername] = useState("");
-    const [password, setPassword] = useState("");
+export function LoginPage() {
+  return (
+    <div className="space-y-10">
+      <div className="flex flex-col items-center text-center">
+        <img
+          src={logo}
+          alt="FitNess"
+          className="mb-5 h-24 w-24 object-contain"
+        />
 
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState("");
-    const handleLogin = async () => {
+        <h1 className="text-2xl font-semibold tracking-tight">
+          FitNess
+        </h1>
 
-        console.log("Botón pulsado");
+        <p className="mt-2 text-xs uppercase tracking-[0.3em] text-text-subtle">
+          Your body. Your data.
+        </p>
+      </div>
 
-    try {
+      <div className="rounded-xl border border-surface-elevated/70 bg-surface/40 p-6 shadow-2xl backdrop-blur-sm">
+        <div className="mb-6">
+          <h2 className="text-lg font-medium">
+            Welcome back
+          </h2>
 
-        console.log("Llamando al backend...");
-
-        const response = await login(username, password);
-
-        console.log(response);
-
-        localStorage.setItem("access_token", response.access_token);
-        localStorage.setItem("refresh_token", response.refresh_token);
-
-        navigate("/home");
-
-    } catch (error) {
-
-        console.error(error);
-
-    }
-
-};
-    return (
-        <div
-            style={{
-                height: "100vh",
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                backgroundColor: "#f4f4f4",
-            }}
-        >
-            <div
-                style={{
-                    width: "350px",
-                    backgroundColor: "#ffffff",
-                    padding: "30px",
-                    borderRadius: "10px",
-                    boxShadow: "0 4px 10px rgba(0,0,0,.2)",
-                }}
-            >
-                <h2
-                    style={{
-                        textAlign: "center",
-                        marginBottom: "25px",
-                    }}
-                >
-                    Fitness
-                </h2>
-
-                <div style={{ marginBottom: "15px" }}>
-                    <label>Usuario</label>
-
-                    <input
-                        type="text"
-                        value={username}
-                        onChange={(e) => setUsername(e.target.value)}
-                        placeholder="Usuario"
-                        style={{
-                            width: "100%",
-                            padding: "10px",
-                            marginTop: "5px",
-                            boxSizing: "border-box",
-                        }}
-                    />
-                </div>
-
-                <div style={{ marginBottom: "20px" }}>
-                    <label>Contraseña</label>
-
-                    <input
-                        type="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        placeholder="Contraseña"
-                        style={{
-                            width: "100%",
-                            padding: "10px",
-                            marginTop: "5px",
-                            boxSizing: "border-box",
-                        }}
-                    />
-                </div>
-
-                {error && (
-                    <div
-                        style={{
-                            color: "red",
-                            marginBottom: "15px",
-                            textAlign: "center",
-                        }}
-                    >
-                        {error}
-                    </div>
-                )}
-
-                <button
-                    onClick={handleLogin}
-                    disabled={loading}
-                    style={{
-                        width: "100%",
-                        padding: "12px",
-                        cursor: "pointer",
-                        backgroundColor: "#2563eb",
-                        color: "#ffffff",
-                        border: "none",
-                        borderRadius: "5px",
-                        fontWeight: "bold",
-                    }}
-                >
-                    {loading ? "Iniciando sesión..." : "Iniciar sesión"}
-                </button>
-            </div>
+          <p className="mt-1 text-sm text-text-subtle">
+            Sign in to continue your progress.
+          </p>
         </div>
-    );
+
+        <LoginForm />
+      </div>
+
+      <p className="text-center text-sm text-text-subtle">
+        New to FitNess?{" "}
+        <Link
+          to="/register"
+          className="font-medium text-yellow-light transition-colors hover:text-yellow"
+        >
+          Create an account
+        </Link>
+      </p>
+    </div>
+  );
 }
