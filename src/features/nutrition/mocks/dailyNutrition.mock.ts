@@ -1,3 +1,9 @@
+export type MealType =
+  | "breakfast"
+  | "lunch"
+  | "snack"
+  | "dinner";
+
 export interface DailyNutrition {
   date: string;
 
@@ -25,13 +31,13 @@ export interface DailyNutrition {
 
   meals: {
     id: string;
-    name: string;
+    type: MealType;
     calories: number;
   }[];
 }
 
 export const dailyNutritionMock: DailyNutrition = {
-  date: "2026-08-24",
+  date: "2026-08-28",
 
   calories: {
     consumed: 1840,
@@ -58,22 +64,22 @@ export const dailyNutritionMock: DailyNutrition = {
   meals: [
     {
       id: "breakfast",
-      name: "Breakfast",
+      type: "breakfast",
       calories: 520,
     },
     {
       id: "lunch",
-      name: "Lunch",
+      type: "lunch",
       calories: 730,
     },
     {
       id: "snack",
-      name: "Snack",
+      type: "snack",
       calories: 190,
     },
     {
       id: "dinner",
-      name: "Dinner",
+      type: "dinner",
       calories: 400,
     },
   ],

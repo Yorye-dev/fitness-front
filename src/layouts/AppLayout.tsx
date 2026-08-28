@@ -1,122 +1,185 @@
 import {
-  Dumbbell,
   LayoutDashboard,
-  Salad,
-  Target,
-  User,
+  LogOut,
 } from "lucide-react";
-import { NavLink, Outlet } from "react-router-dom";
+import {
+  NavLink,
+  Outlet,
+  useNavigate,
+} from "react-router-dom";
 
-import logo from "@/assets/logos/logo-dark.svg";
+import { PreferencesMenu } from "@/components/preferences/PreferencesMenu";
+import { Logo } from "@/components/ui/Logo";
 import { useAuthStore } from "@/features/auth/stores/auth.store";
-
-const navigation = [
-  {
-    name: "Dashboard",
-    href: "/",
-    icon: LayoutDashboard,
-  },
-  {
-    name: "Nutrition",
-    href: "/nutrition",
-    icon: Salad,
-  },
-  {
-    name: "Workouts",
-    href: "/workouts",
-    icon: Dumbbell,
-  },
-  {
-    name: "Goals",
-    href: "/goals",
-    icon: Target,
-  },
-  {
-    name: "Profile",
-    href: "/profile",
-    icon: User,
-  },
-];
+import { useTranslation } from "@/hooks/useTranslation";
 
 export function AppLayout() {
-  const user = useAuthStore((state) => state.user);
+  const t = useTranslation();
+
+  const navigate = useNavigate();
+
+  const user = useAuthStore(
+    (state) => state.user,
+  );
+
+  const logout = useAuthStore(
+    (state) => state.logout,
+  );
+
+  const handleLogout = () => {
+    logout();
+
+    navigate("/login", {
+      replace: true,
+    });
+  };
+
+  const userInitial =
+    user?.username
+      ?.charAt(0)
+      .toUpperCase() ?? "?";
 
   return (
     <div className="min-h-screen bg-bg text-text">
       {/* Desktop sidebar */}
-      <aside className="fixed inset-y-0 left-0 hidden w-64 border-r border-surface-elevated/50 bg-bg-deep lg:flex lg:flex-col">
+      <aside
+        className={[
+          "fixed inset-y-0 left-0",
+          "hidden w-64",
+          "border-r border-surface-elevated/50",
+          "bg-bg-deep",
+          "lg:flex lg:flex-col",
+        ].join(" ")}
+      >
         <div className="flex h-20 items-center gap-3 px-6">
-          <img
-            src={logo}
-            alt="FitNess"
-            className="h-10 w-10 object-contain"
-          />
+          <Logo className="h-10 w-10 object-contain" />
 
           <span className="text-lg font-semibold tracking-tight">
-            FitNess
+            {t.app.name}
           </span>
         </div>
 
-        <nav className="flex-1 space-y-1 px-3 py-6">
-          {navigation.map((item) => {
-            const Icon = item.icon;
+        <nav className="flex-1 px-3 py-6">
+          <NavLink
+            to="/"
+            end
+            className={({
+              isActive,
+            }) =>
+              [
+                "flex items-center gap-3",
+                "rounded-lg px-3 py-2.5",
+                "text-sm transition",
+                isActive
+                  ? "bg-surface text-green-light"
+                  : "text-text-subtle hover:bg-surface/50 hover:text-text",
+              ].join(" ")
+            }
+          >
+            <LayoutDashboard className="h-4 w-4" />
 
-            return (
-              <NavLink
-                key={item.name}
-                to={item.href}
-                end={item.href === "/"}
-                className={({ isActive }) =>
-                  [
-                    "group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition",
-                    isActive
-                      ? "bg-surface text-green-light"
-                      : "text-text-subtle hover:bg-surface/50 hover:text-text",
-                  ].join(" ")
-                }
-              >
-                <Icon className="h-4 w-4" />
-
-                {item.name}
-              </NavLink>
-            );
-          })}
+            {
+              t.navigation
+                .dashboard
+            }
+          </NavLink>
         </nav>
 
         <div className="border-t border-surface-elevated/50 p-4">
-          <div className="rounded-lg bg-surface/40 px-4 py-3">
-            <p className="text-xs uppercase tracking-widest text-text-subtle">
-              Signed in as
+          <div className="rounded-lg bg-surface/40 p-3">
+            <p className="text-[10px] uppercase tracking-widest text-text-subtle">
+              {
+                t.account
+                  .signedInAs
+              }
             </p>
 
             <p className="mt-1 truncate text-sm font-medium">
               {user?.username}
             </p>
+
+            <button
+              type="button"
+              onClick={handleLogout}
+              className={[
+                "mt-3 flex w-full items-center gap-2",
+                "rounded-md px-2 py-2",
+                "text-xs text-text-subtle",
+                "transition",
+                "hover:bg-bg/50 hover:text-red-light",
+              ].join(" ")}
+            >
+              <LogOut className="h-4 w-4" />
+
+              {
+                t.account
+                  .logout
+              }
+            </button>
           </div>
         </div>
       </aside>
 
-      {/* Main content */}
+      {/* Application */}
       <div className="min-h-screen lg:pl-64">
-        {/* Header */}
-        <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-surface-elevated/40 bg-bg/90 px-4 backdrop-blur-md sm:px-6 lg:h-20 lg:px-10">
+        <header
+          className={[
+            "sticky top-0 z-30",
+            "flex h-16 items-center justify-between",
+            "border-b border-surface-elevated/40",
+            "bg-bg/90",
+            "px-4 backdrop-blur-md",
+            "sm:px-6",
+            "lg:h-20 lg:px-10",
+          ].join(" ")}
+        >
           <div className="flex items-center gap-3">
-            {/* Mobile logo */}
-            <img
-              src={logo}
-              alt="FitNess"
-              className="h-8 w-8 object-contain lg:hidden"
-            />
+            <Logo className="h-8 w-8 object-contain lg:hidden" />
 
-            <div>
-              <p className="text-[10px] uppercase tracking-[0.25em] text-green-light sm:text-xs">
-                FitNess OS
-              </p>
-            </div>
+            <p className="text-[10px] uppercase tracking-[0.25em] text-green-light sm:text-xs">
+              {t.app.systemName}
+            </p>
           </div>
 
-          <div className="flex h-9 w-9 items-center justify-center rounded-full border border-surface-elevated bg-surface text-sm font-medium">
-            {user?.username?.charAt(0).toUpperCase()}
+          <div className="flex items-center gap-2">
+            <PreferencesMenu />
+
+            <div
+              className={[
+                "flex h-10 w-10",
+                "items-center justify-center",
+                "rounded-lg",
+                "border border-surface-elevated/60",
+                "bg-surface/40",
+                "text-sm font-medium",
+              ].join(" ")}
+            >
+              {userInitial}
+            </div>
+
+            <button
+              type="button"
+              onClick={handleLogout}
+              title={
+                t.account.logout
+              }
+              aria-label={
+                t.account.logout
+              }
+              className={[
+                "flex h-10 w-10",
+                "items-center justify-center",
+                "rounded-lg",
+                "border border-surface-elevated/60",
+                "bg-surface/40",
+                "text-text-subtle",
+                "transition",
+                "hover:text-red-light",
+                "lg:hidden",
+              ].join(" ")}
+            >
+              <LogOut className="h-4 w-4" />
+            </button>
           </div>
         </header>
 
@@ -125,31 +188,43 @@ export function AppLayout() {
         </main>
       </div>
 
-      {/* Mobile bottom navigation */}
-      <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-surface-elevated/50 bg-bg-deep/95 px-2 pb-[env(safe-area-inset-bottom)] backdrop-blur-md lg:hidden">
+      {/* Mobile navigation */}
+      <nav
+        className={[
+          "fixed inset-x-0 bottom-0 z-40",
+          "border-t border-surface-elevated/50",
+          "bg-bg-deep/95",
+          "pb-[env(safe-area-inset-bottom)]",
+          "backdrop-blur-md",
+          "lg:hidden",
+        ].join(" ")}
+      >
         <div className="mx-auto flex h-16 max-w-md items-center justify-around">
-          {navigation.map((item) => {
-            const Icon = item.icon;
+          <NavLink
+            to="/"
+            end
+            className={({
+              isActive,
+            }) =>
+              [
+                "flex flex-col",
+                "items-center justify-center",
+                "gap-1 rounded-lg",
+                "px-6 py-2",
+                "text-[10px]",
+                isActive
+                  ? "text-green-light"
+                  : "text-text-subtle",
+              ].join(" ")
+            }
+          >
+            <LayoutDashboard className="h-5 w-5" />
 
-            return (
-              <NavLink
-                key={item.name}
-                to={item.href}
-                end={item.href === "/"}
-                className={({ isActive }) =>
-                  [
-                    "flex min-w-14 flex-col items-center justify-center gap-1 rounded-lg px-2 py-2 text-[10px] transition",
-                    isActive
-                      ? "text-green-light"
-                      : "text-text-subtle",
-                  ].join(" ")
-                }
-              >
-                <Icon className="h-5 w-5" />
-                <span>{item.name}</span>
-              </NavLink>
-            );
-          })}
+            {
+              t.navigation
+                .dashboard
+            }
+          </NavLink>
         </div>
       </nav>
     </div>

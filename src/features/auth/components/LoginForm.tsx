@@ -1,72 +1,132 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { useAuthStore } from "@/features/auth/stores/auth.store";
+import { useTranslation } from "@/hooks/useTranslation";
 
-const loginSchema = z.object({
-  username: z.string().min(1, "Username is required"),
-  password: z.string().min(1, "Password is required"),
-});
+import { useAuthStore } from "../stores/auth.store";
 
-type LoginFormData = z.infer<typeof loginSchema>;
+interface LoginFormData {
+  username: string;
+  password: string;
+}
 
 export function LoginForm() {
+  const t = useTranslation();
+
   const navigate = useNavigate();
-  const signIn = useAuthStore((state) => state.signIn);
+
+  const signIn = useAuthStore(
+    (state) => state.signIn,
+  );
+
+  const loginSchema = useMemo(
+    () =>
+      z.object({
+        username: z
+          .string()
+          .min(
+            1,
+            t.auth.usernameRequired,
+          ),
+
+        password: z
+          .string()
+          .min(
+            1,
+            t.auth.passwordRequired,
+          ),
+      }),
+    [
+      t.auth.usernameRequired,
+      t.auth.passwordRequired,
+    ],
+  );
 
   const {
     register,
     handleSubmit,
     setError,
-    formState: { errors, isSubmitting },
+    formState: {
+      errors,
+      isSubmitting,
+    },
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
+
+    defaultValues: {
+      username: "",
+      password: "",
+    },
   });
 
-  const onSubmit = async (data: LoginFormData) => {
+  const onSubmit = async (
+    data: LoginFormData,
+  ) => {
     try {
       await signIn(data);
-      navigate("/", { replace: true });
+
+      navigate("/", {
+        replace: true,
+      });
     } catch {
       setError("root", {
-        message: "Invalid username or password",
+        message:
+          t.auth.invalidCredentials,
       });
     }
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+    <form
+      onSubmit={handleSubmit(onSubmit)}
+      className="space-y-5"
+    >
       <Input
         id="username"
-        label="Username"
-        placeholder="Enter your username"
+        label={t.auth.username}
+        placeholder={
+          t.auth.usernamePlaceholder
+        }
         autoComplete="username"
         {...register("username")}
-        error={errors.username?.message}
+        error={
+          errors.username?.message
+        }
       />
 
       <Input
         id="password"
-        label="Password"
+        label={t.auth.password}
         type="password"
-        placeholder="Enter your password"
+        placeholder={
+          t.auth.passwordPlaceholder
+        }
         autoComplete="current-password"
         {...register("password")}
-        error={errors.password?.message}
+        error={
+          errors.password?.message
+        }
       />
 
       {errors.root?.message && (
-        <p className="text-sm text-red-light">
+        <p className="rounded-lg border border-red-light/30 bg-red-light/5 px-3 py-2 text-sm text-red-light">
           {errors.root.message}
         </p>
       )}
 
-      <Button type="submit" loading={isSubmitting}>
-        LOGIN
+      <Button
+        type="submit"
+        loading={isSubmitting}
+        loadingLabel={
+          t.auth.authenticating
+        }
+      >
+        {t.auth.login}
       </Button>
     </form>
   );

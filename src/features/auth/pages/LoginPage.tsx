@@ -1,50 +1,38 @@
-import { Link } from "react-router-dom";
+import { Logo } from "@/components/ui/Logo";
+import { useTranslation } from "@/hooks/useTranslation";
 
-import logo from "../../../assets/logos/logo-dark.svg";
 import { LoginForm } from "../components/LoginForm";
 
 export function LoginPage() {
+  const t = useTranslation();
+
   return (
-    <div className="space-y-10">
+    <div className="space-y-8 sm:space-y-10">
       <div className="flex flex-col items-center text-center">
-        <img
-          src={logo}
-          alt="FitNess"
-          className="mb-5 h-24 w-24 object-contain"
-        />
+        <Logo className="mb-5 h-24 w-24 object-contain" />
 
         <h1 className="text-2xl font-semibold tracking-tight">
-          FitNess
+          {t.app.name}
         </h1>
 
         <p className="mt-2 text-xs uppercase tracking-[0.3em] text-text-subtle">
-          Your body. Your data.
+          {t.app.tagline}
         </p>
       </div>
 
-      <div className="rounded-xl border border-surface-elevated/70 bg-surface/40 p-6 shadow-2xl backdrop-blur-sm">
+      <div className="rounded-2xl border border-surface-elevated/70 bg-surface/35 p-5 shadow-2xl backdrop-blur-sm sm:p-6">
         <div className="mb-6">
           <h2 className="text-lg font-medium">
-            Welcome back
+            {t.auth.welcomeBack}
           </h2>
 
           <p className="mt-1 text-sm text-text-subtle">
-            Sign in to continue your progress.
+            {t.auth.description}
           </p>
         </div>
 
         <LoginForm />
       </div>
-
-      <p className="text-center text-sm text-text-subtle">
-        New to FitNess?{" "}
-        <Link
-          to="/register"
-          className="font-medium text-yellow-light transition-colors hover:text-yellow"
-        >
-          Create an account
-        </Link>
-      </p>
     </div>
   );
 }
