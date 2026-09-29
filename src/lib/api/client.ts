@@ -3,7 +3,8 @@
 import axios from "axios";
 
 export const apiClient = axios.create({
-  baseURL: "http://localhost:8080",
+  // Vite and Nginx forward /api and /auth to Axum on the same origin.
+  baseURL: "",
   headers: {
     "Content-Type": "application/json",
   },
