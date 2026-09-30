@@ -1,130 +1,79 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMemo } from "react";
 import { useForm } from "react-hook-form";
-import { useNavigate } from "react-router-dom";
-import { z } from "zod";
-
+import { useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import { PasswordInput } from "@/components/ui/PasswordInput";
 import { useTranslation } from "@/hooks/useTranslation";
-
+import { authErrorMessage } from "@/lib/api/auth-errors";
+import { safeReturnPath } from "../lib/redirect";
 import { useAuthStore } from "../stores/auth.store";
-
-interface LoginFormData {
-  username: string;
-  password: string;
-}
+import type { LoginRequest } from "../types/auth.types";
+import { loginSchema } from "../validation/auth.schemas";
 
 export function LoginForm() {
   const t = useTranslation();
-
   const navigate = useNavigate();
-
-  const signIn = useAuthStore(
-    (state) => state.signIn,
-  );
-
-  const loginSchema = useMemo(
-    () =>
-      z.object({
-        username: z
-          .string()
-          .min(
-            1,
-            t.auth.usernameRequired,
-          ),
-
-        password: z
-          .string()
-          .min(
-            1,
-            t.auth.passwordRequired,
-          ),
-      }),
-    [
-      t.auth.usernameRequired,
-      t.auth.passwordRequired,
-    ],
-  );
-
+  const location = useLocation();
+  const signIn = useAuthStore((state) => state.signIn);
   const {
     register,
     handleSubmit,
     setError,
-    formState: {
-      errors,
-      isSubmitting,
-    },
-  } = useForm<LoginFormData>({
-    resolver: zodResolver(loginSchema),
-
-    defaultValues: {
-      username: "",
-      password: "",
-    },
+    clearErrors,
+    formState: { errors, isSubmitting },
+  } = useForm<LoginRequest>({
+    resolver: zodResolver(loginSchema(t)),
+    mode: "onTouched",
+    defaultValues: { username: location.state?.username ?? "", password: "" },
   });
 
-  const onSubmit = async (
-    data: LoginFormData,
-  ) => {
+  const onSubmit = async (data: LoginRequest) => {
+    clearErrors("root");
     try {
       await signIn(data);
-
-      navigate("/", {
-        replace: true,
-      });
-    } catch {
-      setError("root", {
-        message:
-          t.auth.invalidCredentials,
-      });
+      navigate(safeReturnPath(location.state), { replace: true });
+    } catch (error) {
+      setError("root", { message: authErrorMessage(error, t) });
     }
   };
 
   return (
     <form
+      noValidate
       onSubmit={handleSubmit(onSubmit)}
       className="space-y-5"
+      aria-busy={isSubmitting}
     >
-      <Input
-        id="username"
-        label={t.auth.username}
-        placeholder={
-          t.auth.usernamePlaceholder
-        }
-        autoComplete="username"
-        {...register("username")}
-        error={
-          errors.username?.message
-        }
-      />
-
-      <Input
-        id="password"
-        label={t.auth.password}
-        type="password"
-        placeholder={
-          t.auth.passwordPlaceholder
-        }
-        autoComplete="current-password"
-        {...register("password")}
-        error={
-          errors.password?.message
-        }
-      />
-
+      <fieldset disabled={isSubmitting} className="space-y-5">
+        <Input
+          label={t.auth.username}
+          placeholder={t.auth.usernamePlaceholder}
+          autoComplete="username"
+          autoCapitalize="none"
+          spellCheck={false}
+          required
+          {...register("username")}
+          error={errors.username?.message}
+        />
+        <PasswordInput
+          label={t.auth.password}
+          placeholder={t.auth.passwordPlaceholder}
+          autoComplete="current-password"
+          required
+          {...register("password")}
+          error={errors.password?.message}
+        />
+      </fieldset>
       {errors.root?.message && (
-        <p className="rounded-lg border border-red-light/30 bg-red-light/5 px-3 py-2 text-sm text-red-light">
+        <p role="alert" className="form-error">
           {errors.root.message}
         </p>
       )}
-
       <Button
         type="submit"
         loading={isSubmitting}
-        loadingLabel={
-          t.auth.authenticating
-        }
+        loadingLabel={t.auth.authenticating}
       >
         {t.auth.login}
       </Button>

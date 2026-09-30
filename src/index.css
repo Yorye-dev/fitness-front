@@ -1,6 +1,7 @@
 @import "tailwindcss";
 
 :root {
+  /* Gruvbox light: backgrounds, foregrounds and accents share its palette. */
   --color-bg: #fbf1c7;
   --color-bg-deep: #f2e5bc;
 
@@ -16,6 +17,8 @@
 
   --color-green: #79740e;
   --color-green-light: #98971a;
+  --color-action: #79740e;
+  --color-accent-contrast: #fbf1c7;
 
   --color-yellow: #b57614;
   --color-yellow-light: #d79921;
@@ -31,6 +34,7 @@
 }
 
 .dark {
+  /* Gruvbox dark, with its bright green for the primary action. */
   --color-bg: #282828;
   --color-bg-deep: #1d2021;
 
@@ -46,6 +50,8 @@
 
   --color-green: #98971a;
   --color-green-light: #b8bb26;
+  --color-action: #b8bb26;
+  --color-accent-contrast: #1d2021;
 
   --color-yellow: #d79921;
   --color-yellow-light: #fabd2f;
@@ -95,10 +101,97 @@ body,
   min-height: 100%;
 }
 
+/* Keep the insertion caret in editable controls, including password fields. */
+#root {
+  caret-color: transparent;
+}
+
+#root :is(input, textarea, [contenteditable]):read-write {
+  caret-color: auto;
+}
+
 body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
   background: var(--color-bg);
   color: var(--color-text);
+  font-family:
+    "Segoe UI",
+    system-ui,
+    -apple-system,
+    sans-serif;
+}
+
+@layer components {
+  .app-dialog::backdrop {
+    background: rgb(29 32 33 / 65%);
+  }
+  .field-input {
+    @apply h-12 w-full min-w-0 rounded-xl border border-surface-elevated bg-bg/60 px-3 text-sm text-text outline-none transition placeholder:text-text-subtle disabled:opacity-60;
+  }
+  .field-input:focus:not([aria-invalid="true"]) {
+    border-color: color-mix(
+      in srgb,
+      var(--color-green) 70%,
+      var(--color-surface-elevated)
+    );
+  }
+  .auth-card {
+    @apply rounded-2xl border border-surface-elevated/70 bg-surface/35 p-5 shadow-xl backdrop-blur-sm sm:p-6;
+  }
+  .auth-grid {
+    background-image:
+      linear-gradient(var(--color-green-light) 1px, transparent 1px),
+      linear-gradient(90deg, var(--color-green-light) 1px, transparent 1px);
+    background-size: 48px 48px;
+    opacity: 0.1;
+  }
+  .auth-card .field-input {
+    @apply rounded-lg;
+  }
+  .panel {
+    @apply rounded-2xl border border-surface-elevated/50 bg-surface/25 p-5 sm:p-6;
+  }
+  .eyebrow {
+    @apply text-xs font-semibold uppercase tracking-[0.18em] text-green;
+  }
+  .secondary-button {
+    @apply inline-flex min-h-11 items-center justify-center rounded-xl border border-surface-elevated px-4 py-2 text-sm font-medium text-text transition hover:bg-surface/70 disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  .icon-button {
+    @apply inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-surface-elevated/60 text-text-subtle transition hover:bg-surface/60 hover:text-text disabled:cursor-not-allowed disabled:opacity-40;
+  }
+  .form-error {
+    @apply rounded-xl border border-red-light/30 bg-red-light/5 px-4 py-3 text-sm leading-relaxed text-red-light;
+  }
+}
+
+button,
+a,
+summary,
+select,
+input {
+  -webkit-tap-highlight-color: transparent;
+}
+button:not(:disabled),
+select,
+summary {
+  cursor: pointer;
+}
+:focus-visible:not(.field-input) {
+  outline: 2px solid var(--color-green);
+  outline-offset: 4px;
+}
+.dark {
+  color-scheme: dark;
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
 }

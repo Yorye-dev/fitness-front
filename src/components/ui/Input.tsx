@@ -1,45 +1,62 @@
-import type { InputHTMLAttributes } from "react";
+import { useId, type InputHTMLAttributes, type ReactNode } from "react";
 
-interface InputProps
-  extends InputHTMLAttributes<HTMLInputElement> {
+export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   label: string;
   error?: string;
+  hint?: string;
+  trailing?: ReactNode;
 }
 
 export function Input({
   label,
   error,
+  hint,
+  trailing,
   id,
   className = "",
   ...props
 }: InputProps) {
+  const generatedId = useId();
+  const inputId = id ?? generatedId;
+  const describedBy = [
+    props["aria-describedby"],
+    hint && `${inputId}-hint`,
+    error && `${inputId}-error`,
+  ]
+    .filter(Boolean)
+    .join(" ");
   return (
     <div className="space-y-2">
       <label
-        htmlFor={id}
-        className="block text-xs font-medium uppercase tracking-widest text-text-subtle"
+        htmlFor={inputId}
+        className="block text-sm font-medium text-text-muted"
       >
         {label}
       </label>
-
-      <input
-        id={id}
-        className={[
-          "h-12 w-full rounded-lg",
-          "border border-surface-elevated",
-          "bg-bg/50 px-4",
-          "text-sm text-text",
-          "outline-none transition",
-          "placeholder:text-text-subtle/50",
-          "focus:border-green-light",
-          "focus:ring-1 focus:ring-green-light/30",
-          className,
-        ].join(" ")}
-        {...props}
-      />
-
+      <div className="relative">
+        <input
+          {...props}
+          id={inputId}
+          aria-invalid={!!error}
+          aria-describedby={describedBy || undefined}
+          className={`field-input ${error ? "border-red-light" : ""} ${trailing ? "pr-12" : ""} ${className}`}
+        />
+        {trailing && (
+          <div className="absolute inset-y-0 right-1 flex items-center">
+            {trailing}
+          </div>
+        )}
+      </div>
+      {hint && (
+        <p
+          id={`${inputId}-hint`}
+          className="text-xs leading-relaxed text-text-subtle"
+        >
+          {hint}
+        </p>
+      )}
       {error && (
-        <p className="text-xs text-red-light">
+        <p id={`${inputId}-error`} className="text-xs text-red-light">
           {error}
         </p>
       )}

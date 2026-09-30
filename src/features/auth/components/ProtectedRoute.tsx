@@ -1,32 +1,21 @@
-import {
-  Navigate,
-  Outlet,
-} from "react-router-dom";
+import { Navigate, Outlet, useLocation } from "react-router-dom";
 
 import { useTranslation } from "@/hooks/useTranslation";
 
 import { useAuthStore } from "../stores/auth.store";
 
 export function ProtectedRoute() {
+  const location = useLocation();
   const t = useTranslation();
 
-  const isAuthenticated =
-    useAuthStore(
-      (state) =>
-        state.isAuthenticated,
-    );
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
 
-  const isLoading =
-    useAuthStore(
-      (state) => state.isLoading,
-    );
+  const isLoading = useAuthStore((state) => state.isLoading);
 
   if (isLoading) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-bg text-text">
-        <p className="text-sm text-text-subtle">
-          {t.common.loading}
-        </p>
+        <p className="text-sm text-text-subtle">{t.common.loading}</p>
       </main>
     );
   }
@@ -35,6 +24,7 @@ export function ProtectedRoute() {
     return (
       <Navigate
         to="/login"
+        state={{ from: location.pathname + location.search + location.hash }}
         replace
       />
     );

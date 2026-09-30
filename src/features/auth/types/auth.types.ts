@@ -10,6 +10,22 @@ export interface AuthResponse {
   refresh_token: string;
 }
 
+export interface RegisterRequest {
+  username: string;
+  plain_password: string;
+  sex: "male" | "female";
+  weight: number;
+  height: number;
+  age: number;
+  activity_level:
+    | "sedentary"
+    | "lightly_active"
+    | "moderately_active"
+    | "very_active"
+    | "extra_active";
+  goal: "lose_weight" | "maintain" | "gain_muscle";
+}
+
 export interface User {
   id: string;
   username: string;

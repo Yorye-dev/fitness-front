@@ -1,37 +1,34 @@
-import { Logo } from "@/components/ui/Logo";
+import { Link, useLocation } from "react-router-dom";
 import { useTranslation } from "@/hooks/useTranslation";
-
 import { LoginForm } from "../components/LoginForm";
 
 export function LoginPage() {
   const t = useTranslation();
-
+  const location = useLocation();
   return (
-    <div className="space-y-8 sm:space-y-10">
-      <div className="flex flex-col items-center text-center">
-        <Logo className="mb-5 h-24 w-24 object-contain" />
-
-        <h1 className="text-2xl font-semibold tracking-tight">
-          {t.app.name}
-        </h1>
-
-        <p className="mt-2 text-xs uppercase tracking-[0.3em] text-text-subtle">
-          {t.app.tagline}
+    <div className="auth-card mx-auto max-w-md">
+      <h1 className="text-lg font-medium">{t.auth.welcomeBack}</h1>
+      <p className="mb-6 mt-1 text-sm leading-relaxed text-text-subtle">
+        {t.auth.description}
+      </p>
+      {location.state?.registered && (
+        <p
+          role="status"
+          className="mb-5 rounded-xl bg-green/10 p-4 text-sm text-green"
+        >
+          {t.auth.accountCreated}
         </p>
-      </div>
-
-      <div className="rounded-2xl border border-surface-elevated/70 bg-surface/35 p-5 shadow-2xl backdrop-blur-sm sm:p-6">
-        <div className="mb-6">
-          <h2 className="text-lg font-medium">
-            {t.auth.welcomeBack}
-          </h2>
-
-          <p className="mt-1 text-sm text-text-subtle">
-            {t.auth.description}
-          </p>
-        </div>
-
-        <LoginForm />
+      )}
+      <LoginForm />
+      <div className="mt-6 border-t border-surface-elevated/50 pt-5 text-center">
+        <p className="mb-2 text-xs text-text-subtle">{t.auth.noAccount}</p>
+        <Link
+          to="/register"
+          state={location.state}
+          className="secondary-button w-full rounded-lg border-green/30 text-green"
+        >
+          {t.auth.register}
+        </Link>
       </div>
     </div>
   );
