@@ -1,9 +1,20 @@
 @import "tailwindcss";
 
+.water-bottle-level {
+  transition: transform 850ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+@media (prefers-reduced-motion: reduce) {
+  .water-bottle-level {
+    transition: none;
+  }
+}
+
 :root {
-  /* Gruvbox light: backgrounds, foregrounds and accents share its palette. */
-  --color-bg: #fbf1c7;
-  --color-bg-deep: #f2e5bc;
+  /* Gruvbox light: light0_hard keeps the background light within the palette. */
+  color-scheme: light;
+  --color-bg: #f9f5d7;
+  --color-bg-deep: #fbf1c7;
+  --color-panel: #f9f5d7;
 
   --color-surface: #ebdbb2;
   --color-surface-elevated: #d5c4a1;
@@ -18,7 +29,7 @@
   --color-green: #79740e;
   --color-green-light: #98971a;
   --color-action: #79740e;
-  --color-accent-contrast: #fbf1c7;
+  --color-accent-contrast: #f9f5d7;
 
   --color-yellow: #b57614;
   --color-yellow-light: #d79921;
@@ -37,6 +48,7 @@
   /* Gruvbox dark, with its bright green for the primary action. */
   --color-bg: #282828;
   --color-bg-deep: #1d2021;
+  --color-panel: color-mix(in srgb, #3c3836 25%, transparent);
 
   --color-surface: #3c3836;
   --color-surface-elevated: #504945;
@@ -137,6 +149,13 @@ body {
       var(--color-surface-elevated)
     );
   }
+  .preferences-select {
+    @apply h-9 w-full appearance-none rounded-md border-0 bg-transparent pl-2 pr-6 text-right text-xs text-text transition hover:bg-surface/40;
+  }
+  .preferences-select option {
+    background: var(--color-bg-deep);
+    color: var(--color-text);
+  }
   .auth-card {
     @apply rounded-2xl border border-surface-elevated/70 bg-surface/35 p-5 shadow-xl backdrop-blur-sm sm:p-6;
   }
@@ -151,7 +170,8 @@ body {
     @apply rounded-lg;
   }
   .panel {
-    @apply rounded-2xl border border-surface-elevated/50 bg-surface/25 p-5 sm:p-6;
+    @apply rounded-2xl border border-surface-elevated/50 p-5 sm:p-6;
+    background: var(--color-panel);
   }
   .eyebrow {
     @apply text-xs font-semibold uppercase tracking-[0.18em] text-green;
@@ -182,6 +202,10 @@ summary {
 :focus-visible:not(.field-input) {
   outline: 2px solid var(--color-green);
   outline-offset: 4px;
+}
+.preferences-select:focus-visible {
+  outline: 1px solid var(--color-green);
+  outline-offset: -1px;
 }
 .dark {
   color-scheme: dark;

@@ -74,17 +74,25 @@ export function AppLayout() {
           <div className="flex items-center gap-3">
             <Logo className="h-8 w-8 lg:hidden" />
             <p className="text-sm font-medium text-text-subtle">
-              {currentSection ? t.navigation[currentSection.label] : t.app.name}
+              {location.pathname === "/profile"
+                ? t.profile.title
+                : currentSection
+                  ? t.navigation[currentSection.label]
+                  : t.app.name}
             </p>
           </div>
           <div className="flex items-center gap-3">
             <PreferencesMenu />
-            <div
-              title={user?.username}
-              className="flex h-10 w-10 items-center justify-center rounded-full bg-green/10 text-sm font-semibold text-green"
+            <NavLink
+              to="/profile"
+              title={t.profile.open}
+              aria-label={`${t.profile.open}: ${user?.username ?? ""}`}
+              className={({ isActive }) =>
+                `flex h-10 w-10 shrink-0 items-center justify-center rounded-full border bg-green/10 text-sm font-semibold text-green transition hover:bg-green/15 ${isActive ? "border-green/40" : "border-transparent"}`
+              }
             >
               {userInitial}
-            </div>
+            </NavLink>
             <button
               type="button"
               onClick={handleLogout}

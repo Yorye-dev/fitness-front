@@ -7,9 +7,11 @@ import { NutritionSummary } from "@/features/nutrition/components/NutritionSumma
 import { useDailyNutrition } from "@/features/nutrition/hooks/useDailyNutrition";
 import { LogConsumptionDialog } from "@/features/nutrition/components/LogConsumptionDialog";
 import { useTranslation } from "@/hooks/useTranslation";
-import { isDateKey, localDateKey } from "@/lib/date";
+import { isDateKey } from "@/lib/date";
+import { useTodayDate } from "@/hooks/useTodayDate";
 import { DailyTraining } from "../components/DailyTraining";
 import { BodyWeightCard } from "../components/BodyWeightCard";
+import { DailyWaterCard } from "@/features/hydration/components/DailyWaterCard";
 
 export function HomePage() {
   const t = useTranslation();
@@ -25,13 +27,15 @@ export function HomePage() {
   const user = useAuthStore((state) => state.user);
   const [params, setParams] = useSearchParams();
   const requestedDate = params.get("date");
-  const date = isDateKey(requestedDate) ? requestedDate : localDateKey();
+  const today = useTodayDate();
+  const date = isDateKey(requestedDate) ? requestedDate : today;
   const { state, reload } = useDailyNutrition(date, user?.id ?? "");
   const changeDate = (nextDate: string) => {
     if (!isDateKey(nextDate)) return;
     setNotice(null);
     setParams((previous) => {
-      previous.set("date", nextDate);
+      if (nextDate === today) previous.delete("date");
+      else previous.set("date", nextDate);
       return previous;
     });
   };
@@ -121,8 +125,19 @@ export function HomePage() {
       )}
 
       <div className="grid gap-5 xl:grid-cols-[minmax(0,2fr)_minmax(260px,1fr)]">
-        <DailyTraining date={date} revision={trainingRevision} />
-        {user && <BodyWeightCard weight={user.weight} />}
+        <DailyTraining
+          key={`training:${user?.id}:${date}`}
+          date={date}
+          revision={trainingRevision}
+        />
+        <div className="space-y-5">
+          <DailyWaterCard
+            key={`water:${user?.id}:${date}`}
+            date={date}
+            revision={trainingRevision}
+          />
+          {user && <BodyWeightCard weight={user.weight} />}
+        </div>
       </div>
       {logging && (
         <LogConsumptionDialog

@@ -25,7 +25,9 @@ export async function registerUser(
   return data.data;
 }
 
-export async function getCurrentUser(): Promise<User> {
-  const { data } = await apiClient.get<ApiResponse<User>>("/api/me");
+export async function getCurrentUser(signal?: AbortSignal): Promise<User> {
+  const { data } = await apiClient.get<ApiResponse<User>>("/api/me", {
+    signal,
+  });
   return data.data;
 }

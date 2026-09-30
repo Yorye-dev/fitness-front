@@ -19,6 +19,7 @@ interface AuthState {
   initialize: () => Promise<void>;
   logout: () => void;
   reset: () => void;
+  replaceCurrentUser: (user: User) => void;
 }
 
 // Registration succeeded, but profile retrieval failed: do not submit registration twice.
@@ -100,5 +101,9 @@ export const useAuthStore = create<AuthState>((set) => {
       set(signedOut);
     },
     reset: () => set(signedOut),
+    replaceCurrentUser: (user) =>
+      set((state) =>
+        state.isAuthenticated && state.user?.id === user.id ? { user } : {},
+      ),
   };
 });

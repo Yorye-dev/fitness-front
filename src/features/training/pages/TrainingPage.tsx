@@ -7,6 +7,7 @@ import { newEntryId } from "@/lib/uuid";
 import { RoutineEditorDialog } from "../components/RoutineEditorDialog";
 import { RoutineExerciseList } from "../components/RoutineExerciseList";
 import { WeeklyScheduleEditor } from "../components/WeeklyScheduleEditor";
+import { TrainingNavigation } from "../components/TrainingNavigation";
 import { useTrainingWorkspace } from "../hooks/useTrainingWorkspace";
 import { trainingErrorMessage } from "../lib/errors";
 import {
@@ -72,6 +73,7 @@ export function TrainingPage() {
           {t.training.newRoutine}
         </button>
       </header>
+      <TrainingNavigation />
       {notice && (
         <p
           role="status"

@@ -30,7 +30,36 @@ export interface TrainingWorkspace {
   schedule: WeeklySchedule;
 }
 export interface DailyWorkout {
+  session: WorkoutSession | null;
   date: string;
   weekday: number;
   routine: WorkoutRoutine | null;
+}
+
+export type ExerciseStatus = "pending" | "completed" | "skipped";
+export interface PerformedSet {
+  reps: number | null;
+  load_kg: number | null;
+  duration_seconds: number | null;
+}
+export interface SessionExercise extends Omit<RoutineExercise, "rest_seconds"> {
+  id: string;
+  exercise_id: string;
+  status: ExerciseStatus;
+  sets: PerformedSet[];
+}
+export interface WorkoutSession {
+  id: string;
+  routine_id: string | null;
+  date: string;
+  name: string;
+  status: "in_progress" | "completed";
+  revision: number;
+  exercises: SessionExercise[];
+}
+export interface SessionUpdate {
+  write_id: string;
+  revision: number;
+  complete: boolean;
+  exercises: Pick<SessionExercise, "id" | "status" | "sets">[];
 }

@@ -2,7 +2,9 @@
 
 React, TypeScript y Vite. Formularios con React Hook Form y Zod; sesión y preferencias con Zustand.
 Mantiene los temas claro/oscuro/sistema y los idiomas español/inglés.
-La paleta visual es Gruvbox en sus variantes clara y oscura. El acceso y el registro usan una
+La paleta visual utiliza los colores de [Gruvbox](https://github.com/morhetz/gruvbox).
+El tema claro usa su crema `light0_hard` (`#f9f5d7`) para fondos y tarjetas, con bordes suaves;
+el oscuro utiliza la paleta Gruvbox dark. El acceso y el registro usan una
 composición centrada y minimalista, con el logotipo y una cuadrícula verde sutil de fondo.
 
 ## Desarrollo
@@ -46,6 +48,8 @@ npm run lint
 | `/intakes?date=YYYY-MM-DD` | Historial de una fecha concreta                                                        |
 | `/meals`            | Catálogo reutilizable de comidas por 100 g o por unidad                                     |
 | `/training`         | Rutinas reutilizables y planificación semanal de entrenamientos                            |
+| `/training/progress` | Evolución por ejercicio y listado de entrenamientos completados                          |
+| `/profile`          | Edición del perfil y preferencias, accesible desde el avatar de la cabecera                |
 
 El registro inicia sesión automáticamente. Si la cuenta se crea pero no se puede recuperar el perfil,
 se vuelve al acceso con un aviso de cuenta creada, evitando repetir el alta.
@@ -66,7 +70,27 @@ Entrenamiento muestra la rutina asignada al día de la semana de la fecha selecc
 La home prioriza las tarjetas de calorías/macros, el peso actual del perfil y el entrenamiento del día.
 Las ingestas se consultan desde **Historial** (`/intakes`), accesible en el menú de escritorio y móvil.
 Su calendario permite recorrer días anteriores. La tarjeta de entrenamiento muestra los ejercicios
-y objetivos de la planificación semanal actual. No representa un historial de sesiones realizadas.
+y objetivos de la planificación semanal actual hasta iniciar la sesión. Desde ese momento muestra
+el registro guardado para esa fecha, incluso si después se modifica o archiva la rutina.
+
+### Configurar el perfil
+
+El avatar de la cabecera abre **Mi perfil** (`/profile`) en escritorio y móvil. La página carga
+`GET /api/me` y permite editar peso, altura, edad, actividad habitual y objetivo con `PUT /api/me`.
+El nombre de usuario y el sexo se muestran como datos de la cuenta según el contrato actual.
+
+Se validan los límites del backend: peso mayor que 0 y hasta 300 kg (hasta tres decimales), altura
+entera de 1 a 250 cm, edad entera de 1 a 120 años y opciones de actividad/objetivo conocidas.
+Las respuestas PascalCase de la API se convierten a los valores snake_case requeridos al guardar.
+
+Guardar actualiza el perfil de la sesión y el peso de la home. El backend recalcula los objetivos
+nutricionales de hoy y conserva las versiones anteriores; el formulario explica este efecto antes
+de enviar. El botón se habilita al modificar datos, evita envíos mientras guarda y conserva los
+cambios si hay un fallo. Se puede restablecer el formulario o confirmar el descarte antes de navegar.
+
+En **Apariencia e idioma** se eligen tema e idioma con aplicación inmediata. Estas preferencias
+se conservan en este navegador; los datos del perfil se guardan en el backend. La página y el menú
+de preferencias comparten los mismos controles accesibles, con identificadores únicos.
 
 ### Registrar comidas
 
@@ -112,10 +136,57 @@ La creación de entradas del catálogo no tiene esa protección de reintentos.
 
 El plan es recurrente, con una rutina por día. Modificarlo cambia la planificación actual para ese
 día de la semana, incluso al consultar una fecha pasada; no se versiona el calendario histórico.
-Los pesos y repeticiones son objetivos. Registrar las series realizadas es un caso de uso posterior.
+Los pesos y repeticiones de la rutina son objetivos; la home permite guardar los resultados reales.
 Se admiten hasta 100 rutinas activas y 50 ejercicios por rutina. Las ediciones simultáneas en varias
 pestañas conservan el último guardado. Reintentar el guardado desde el mismo formulario reutiliza
 el UUID de la rutina, evitando crear otra rutina si se perdió la respuesta.
+
+### Registrar entrenamiento y agua desde la home
+
+- **Empezar entrenamiento** crea una sesión diaria con una copia de los ejercicios y sus objetivos.
+  La tarjeta pasa de **Pendiente** a **En progreso**. Volver a pulsar tras perder la respuesta recupera
+  esa sesión, sin duplicarla. Actualmente se admite una sesión de la home por usuario y fecha.
+- En el diálogo se pueden ajustar peso y repeticiones de cada serie, añadir o quitar series y marcar
+  cada ejercicio como realizado o no realizado. Cardio y movilidad registran duración por serie.
+  Si no hay carga prevista, el peso queda vacío: indicar el real, o 0 para ejercicios sin carga añadida.
+- **Guardar progreso** permite continuar más tarde, incluso desde otro equipo. **Confirmar
+  entrenamiento** exige resolver todos los ejercicios y haber realizado al menos uno. Hay una acción
+  rápida para marcar los pendientes como realizados, seguida de la revisión y confirmación final.
+- Una sesión completada puede consultarse o corregirse desde la misma tarjeta. Cada escritura usa
+  una revisión para detectar cambios en otra pestaña y un identificador para reintentar sin duplicar.
+  Los cambios del diálogo se guardan con los botones, no automáticamente; el cierre avisa si hay
+  cambios sin guardar. El registro no mide automáticamente la duración real de un entrenamiento.
+- **Agua del día** muestra una botella vectorial minimalista, con contorno fino y relleno plano cuyo
+  nivel sube suavemente, el consumo,
+  el objetivo y el porcentaje. La animación respeta `prefers-reduced-motion`. Más del 100 % mantiene
+  la botella llena y conserva el porcentaje y la cantidad reales.
+- Los botones **+250 ml**, **+500 ml** y **Otra cantidad** registran aportes independientes. Se puede
+  deshacer el último. El lápiz cambia el objetivo inicial de 2000 ml desde la fecha seleccionada;
+  las fechas anteriores conservan su objetivo. El valor inicial es editable, no un cálculo médico.
+- La fecha seleccionada se comparte con macros, entrenamiento y agua. Sin una fecha explícita,
+  la home cambia al nuevo día al llegar la medianoche local (o al recuperar el foco). Los días futuros
+  muestran su planificación; el frontal habilita el registro al llegar la fecha.
+
+Los registros se conservan en PostgreSQL. El calendario permite consultar fechas anteriores.
+El progreso de entrenamiento ya tiene su página; las estadísticas específicas de agua siguen pendientes.
+
+### Consultar el progreso del entrenamiento
+
+En **Entrenamiento → Progreso** (`/training/progress`), o desde **Ver progreso** en la home:
+
+- Elegir últimos 30 días, 90 días, un año o un rango personalizado de hasta 366 días.
+- Ver sesiones completadas, series realizadas y repeticiones de fuerza del período.
+- Seleccionar un ejercicio para consultar su gráfica por sesión. Fuerza admite carga máxima,
+  repeticiones totales, volumen (suma de kg × repeticiones) y series; cardio/movilidad, duración y series.
+- Consultar primera y última medición, y su diferencia absoluta dentro del período. Con una sola
+  sesión se muestra el dato, sin atribuirle una evolución. Las diferencias no evalúan por sí solas
+  una mejora o pérdida de rendimiento: pueden cambiar las series o el rango de repeticiones.
+- Desplegar los datos de la gráfica en una tabla y abrir el registro del día para revisar sus series.
+  El listado de entrenamientos se pagina de diez en diez.
+
+Solo se contabilizan sesiones, ejercicios y series completados. El selector agrupa por identidad
+del ejercicio y conserva los registros de rutinas archivadas. Las fechas y el ejercicio elegido
+quedan en la URL. Se mantienen estados de carga, error, reintento y período sin datos.
 
 ## Estructura para ampliar casos de uso
 
@@ -189,6 +260,15 @@ El PUT de rutina crea o reemplaza su contenido completo con un UUID proporcionad
 La semana contiene siete entradas (`weekday`: 1 lunes–7 domingo; `routine_id`: UUID o `null`).
 Estas rutas requieren la migración `0007`, aplicada automáticamente al arrancar el backend.
 
+Con `0008`, `/api/training/daily` también devuelve `session` (o `null`). `POST /api/training/sessions`
+inicia o recupera una sesión diaria; `PUT /api/training/sessions/{id}` guarda avances o resultados.
+Agua utiliza `GET /api/water/daily?date=YYYY-MM-DD`, `POST /api/water/intakes`,
+`DELETE /api/water/intakes/{id}` y `PUT /api/water/goal`.
+
+`GET /api/training/progress?from=YYYY-MM-DD&to=YYYY-MM-DD&exercise_id=UUID` devuelve resúmenes de
+sesiones completadas, ejercicios disponibles y puntos del ejercicio seleccionado. `exercise_id`
+es opcional: sin uno disponible en el período se selecciona el primero por nombre.
+
 El cliente autenticado envía exclusivamente el access token como Bearer. Ante un 401, comparte
 una renovación entre peticiones simultáneas y reintenta una sola vez. Un refresh rechazado limpia
 la sesión. Los fallos de red permiten reintentar; no se presentan como contraseña incorrecta.
@@ -201,7 +281,7 @@ del backend y definir su protección CSRF; no se simula esa capacidad desde el f
 
 ## Alcance de las comprobaciones
 
-Los cambios de login, registro, home, ingestas y planificación semanal se han compilado con TypeScript
+Los cambios de login, registro, home, ingestas, planificación, sesiones y agua se han compilado con TypeScript
 y Vite y analizado con Oxlint.
 No se han ejecutado pruebas automatizadas ni creado cuentas de prueba en la base de datos.
 Queda pendiente comprobar la interacción completa con el backend en ejecución.
